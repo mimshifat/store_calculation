@@ -1,0 +1,58 @@
+name: shukriya_store
+description: "A new Flutter project for Shukriya Store customer ledger."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+
+  # Database & State
+  sqflite: ^2.3.0
+  path: ^1.9.0
+  path_provider: ^2.1.2
+  provider: ^6.1.2
+
+  # Excel & File Handling
+  excel: ^4.0.0
+  file_picker: ^8.0.0
+  share_plus: ^9.0.0
+  permission_handler: ^11.3.0
+  google_fonts: ^6.2.1
+  url_launcher: ^6.3.2
+  flutter_contacts: ^1.1.9+2
+
+  # Cloud Backup
+  workmanager: ^0.9.0+3
+  http: ^1.2.1
+  shared_preferences: ^2.2.3
+  fl_chart: ^1.2.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/sukriyastore.jpeg"
+  min_sdk_android: 21
+
+  # To add custom fonts, we will use Hind Siliguri from Google Fonts. 
+  # However, to avoid bundling the font without user actually having it, 
+  # we'll use the google_fonts package instead for simplicity, or we can just specify the structure.
+  # Let's add google_fonts to dependencies and remove the need for local assets to make it easier for now.
