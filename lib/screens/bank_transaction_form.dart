@@ -83,7 +83,10 @@ class _BankTransactionFormState extends State<BankTransactionForm> {
           );
         }
       } else {
-        await provider.updateTransaction(newTransaction);
+        await provider.updateTransaction(
+          newTransaction,
+          oldAccountId: widget.transaction!.accountId,
+        );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('ট্রানজেকশন আপডেট করা হয়েছে')),
@@ -101,127 +104,149 @@ class _BankTransactionFormState extends State<BankTransactionForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.transaction == null ? 'নতুন ট্রানজেকশন' : 'এডিট ট্রানজেকশন'),
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      body: SingleChildScrollView(
+      child: Container(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Consumer<BankProvider>(
-                builder: (context, provider, child) {
-                  if (provider.accounts.isEmpty) {
-                    return const Text('কোনো অ্যাকাউন্ট নেই। আগে অ্যাকাউন্ট তৈরি করুন।', style: TextStyle(color: Colors.red));
-                  }
-                  return DropdownButtonFormField<BankAccount>(
-                    initialValue: _selectedAccount,
-                    decoration: const InputDecoration(
-                      labelText: 'অ্যাকাউন্ট নির্বাচন করুন',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.account_balance),
-                    ),
-                    items: provider.accounts.map((acc) {
-                      return DropdownMenuItem<BankAccount>(
-                        value: acc,
-                        child: Text('${acc.name} (${acc.accountNumber})'),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedAccount = value;
-                      });
-                    },
-                    validator: (value) => value == null ? 'অ্যাকাউন্ট সিলেক্ট করুন' : null,
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'ট্রানজেকশন ধরন',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.swap_horiz),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.transaction == null ? 'নতুন ট্রানজেকশন' : 'এডিট ট্রানজেকশন',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                items: _transactionTypes.map((type) {
-                  return DropdownMenuItem<String>(
-                    value: type['value'] as String,
-                    child: Row(
-                      children: [
-                        Icon(type['icon'], color: type['color'], size: 20),
-                        const SizedBox(width: 8),
-                        Text(type['label']),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedType = value!;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _amountController,
-                decoration: const InputDecoration(
-                  labelText: 'পরিমাণ (টাকা)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.attach_money),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
                 ),
-                keyboardType: TextInputType.number,
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'পরিমাণ লিখুন' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descController,
-                decoration: const InputDecoration(
-                  labelText: 'বিবরণ (অপশনাল)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.description),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Consumer<BankProvider>(
+                        builder: (context, provider, child) {
+                          if (provider.accounts.isEmpty) {
+                            return const Text('কোনো অ্যাকাউন্ট নেই। আগে অ্যাকাউন্ট তৈরি করুন।', style: TextStyle(color: Colors.red));
+                          }
+                          return DropdownButtonFormField<BankAccount>(
+                            initialValue: _selectedAccount,
+                            decoration: const InputDecoration(
+                              labelText: 'অ্যাকাউন্ট',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.account_balance),
+                              filled: true,
+                            ),
+                            items: provider.accounts.map((acc) {
+                              return DropdownMenuItem<BankAccount>(
+                                value: acc,
+                                child: Text('${acc.name} (${acc.accountNumber})'),
+                              );
+                            }).toList(),
+                            // Disable changing the account
+                            onChanged: null,
+                            validator: (value) => value == null ? 'অ্যাকাউন্ট সিলেক্ট করুন' : null,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedType,
+                        decoration: const InputDecoration(
+                          labelText: 'ট্রানজেকশন ধরন',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.swap_horiz),
+                        ),
+                        items: _transactionTypes.map((type) {
+                          return DropdownMenuItem<String>(
+                            value: type['value'] as String,
+                            child: Row(
+                              children: [
+                                Icon(type['icon'], color: type['color'], size: 20),
+                                const SizedBox(width: 8),
+                                Text(type['label']),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedType = value!;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _amountController,
+                        decoration: const InputDecoration(
+                          labelText: 'পরিমাণ (টাকা)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.attach_money),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) =>
+                            value == null || value.trim().isEmpty ? 'পরিমাণ লিখুন' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _descController,
+                        decoration: const InputDecoration(
+                          labelText: 'বিবরণ (অপশনাল)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.description),
+                        ),
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 16),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.calendar_today),
+                        title: Text('তারিখ: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
+                        trailing: TextButton(
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _selectedDate,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime.now().add(const Duration(days: 365)),
+                            );
+                            if (picked != null) {
+                              setState(() {
+                                _selectedDate = picked;
+                              });
+                            }
+                          },
+                          child: const Text('পরিবর্তন করুন'),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _saveForm,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.green.shade700,
+                          foregroundColor: Colors.white,
+                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        child: const Text('সেভ করুন'),
+                      ),
+                    ],
+                  ),
                 ),
-                maxLines: 2,
               ),
-              const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today),
-                title: Text('তারিখ: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
-                trailing: TextButton(
-                  onPressed: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedDate,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime.now().add(const Duration(days: 365)),
-                    );
-                    if (picked != null) {
-                      setState(() {
-                        _selectedDate = picked;
-                      });
-                    }
-                  },
-                  child: const Text('পরিবর্তন করুন'),
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _saveForm,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.green.shade700,
-                  foregroundColor: Colors.white,
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                child: const Text('সেভ করুন'),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

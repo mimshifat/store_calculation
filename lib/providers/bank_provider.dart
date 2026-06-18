@@ -75,11 +75,16 @@ class BankProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateTransaction(BankTransaction transaction) async {
+  Future<void> updateTransaction(BankTransaction transaction, {int? oldAccountId}) async {
     await DatabaseHelper.instance.updateBankTransaction(transaction);
     await _recalculateBalance(transaction.accountId);
-    if (_selectedAccountId == transaction.accountId) {
-      await loadTransactions(transaction.accountId);
+    
+    if (oldAccountId != null && oldAccountId != transaction.accountId) {
+      await _recalculateBalance(oldAccountId);
+    }
+
+    if (_selectedAccountId == transaction.accountId || _selectedAccountId == oldAccountId) {
+      await loadTransactions(_selectedAccountId!);
     }
   }
 

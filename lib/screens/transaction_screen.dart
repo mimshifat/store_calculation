@@ -612,6 +612,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                   ),
                                   ...dayTxs.map((tx) => TransactionTile(
                                         transaction: tx,
+                                        customerMobile: currentCustomer.mobile,
+                                        customerDueAmount: currentCustomer.dueAmount,
                                         onDelete: () async {
                                           await provider.deleteTransaction(
                                               tx, currentCustomer.id!);

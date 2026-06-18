@@ -237,7 +237,7 @@ class SupplierCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (hasDue && agingDays >= 15) ...[
+                if (hasDue && agingDays >= 1) ...[
                   const SizedBox(height: 8),
                   _buildAgingBadge(agingDays),
                 ],

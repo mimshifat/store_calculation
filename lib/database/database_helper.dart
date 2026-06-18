@@ -27,7 +27,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 8,
+      version: 9,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
       onConfigure: (db) async {
@@ -111,7 +111,9 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         type TEXT NOT NULL,
         accountNumber TEXT NOT NULL,
-        balance REAL DEFAULT 0.0
+        balance REAL DEFAULT 0.0,
+        bankName TEXT,
+        branchName TEXT
       )
     ''');
 
@@ -252,6 +254,15 @@ class DatabaseHelper {
             FOREIGN KEY (customerId) REFERENCES customers (id) ON DELETE CASCADE
           )
         ''');
+      } catch (_) {}
+    }
+
+    if (oldVersion < 9) {
+      try {
+        await db.execute('ALTER TABLE bank_accounts ADD COLUMN bankName TEXT');
+      } catch (_) {}
+      try {
+        await db.execute('ALTER TABLE bank_accounts ADD COLUMN branchName TEXT');
       } catch (_) {}
     }
   }

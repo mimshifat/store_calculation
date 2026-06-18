@@ -16,7 +16,8 @@ class _BankAccountFormState extends State<BankAccountForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _numberController;
-  late TextEditingController _balanceController;
+  late TextEditingController _bankNameController;
+  late TextEditingController _branchNameController;
   String _selectedType = 'bkash';
 
   final List<Map<String, String>> _accountTypes = [
@@ -33,9 +34,8 @@ class _BankAccountFormState extends State<BankAccountForm> {
     super.initState();
     _nameController = TextEditingController(text: widget.account?.name ?? '');
     _numberController = TextEditingController(text: widget.account?.accountNumber ?? '');
-    _balanceController = TextEditingController(
-      text: widget.account != null ? widget.account!.balance.toStringAsFixed(0) : '',
-    );
+    _bankNameController = TextEditingController(text: widget.account?.bankName ?? '');
+    _branchNameController = TextEditingController(text: widget.account?.branchName ?? '');
     if (widget.account != null) {
       _selectedType = widget.account!.type;
     }
@@ -45,7 +45,8 @@ class _BankAccountFormState extends State<BankAccountForm> {
   void dispose() {
     _nameController.dispose();
     _numberController.dispose();
-    _balanceController.dispose();
+    _bankNameController.dispose();
+    _branchNameController.dispose();
     super.dispose();
   }
 
@@ -53,14 +54,15 @@ class _BankAccountFormState extends State<BankAccountForm> {
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text.trim();
       final number = _numberController.text.trim();
-      final balance = double.tryParse(_balanceController.text.trim()) ?? 0.0;
 
       final newAccount = BankAccount(
         id: widget.account?.id,
         name: name,
         accountNumber: number,
         type: _selectedType,
-        balance: widget.account == null ? balance : widget.account!.balance, // Only set balance on create
+        balance: widget.account?.balance ?? 0.0,
+        bankName: _selectedType == 'bank' ? _bankNameController.text.trim() : null,
+        branchName: _selectedType == 'bank' ? _branchNameController.text.trim() : null,
       );
 
       final provider = Provider.of<BankProvider>(context, listen: false);
@@ -141,18 +143,29 @@ class _BankAccountFormState extends State<BankAccountForm> {
                     value == null || value.trim().isEmpty ? 'নম্বর লিখুন' : null,
               ),
               const SizedBox(height: 16),
-              if (widget.account == null) ...[
+              if (_selectedType == 'bank') ...[
                 TextFormField(
-                  controller: _balanceController,
+                  controller: _bankNameController,
                   decoration: const InputDecoration(
-                    labelText: 'বর্তমান ব্যালেন্স (অপশনাল)',
+                    labelText: 'ব্যাংকের নাম (যেমন: ডাচ-বাংলা ব্যাংক)',
                     border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.account_balance_wallet),
+                    prefixIcon: Icon(Icons.account_balance),
                   ),
-                  keyboardType: TextInputType.number,
+                  validator: (value) =>
+                      value == null || value.trim().isEmpty ? 'ব্যাংকের নাম লিখুন' : null,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _branchNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'শাখার নাম (যেমন: মিরপুর শাখা)',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.location_city),
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
+              const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _saveForm,
                 style: ElevatedButton.styleFrom(

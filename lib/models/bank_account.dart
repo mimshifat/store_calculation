@@ -4,6 +4,8 @@ class BankAccount {
   String type; // "bkash", "nagad", "rocket", "upay", "bank", "cash", "other"
   String accountNumber;
   double balance;
+  String? bankName;
+  String? branchName;
 
   BankAccount({
     this.id,
@@ -11,6 +13,8 @@ class BankAccount {
     required this.type,
     required this.accountNumber,
     this.balance = 0.0,
+    this.bankName,
+    this.branchName,
   });
 
   Map<String, dynamic> toMap() {
@@ -19,6 +23,8 @@ class BankAccount {
       'type': type,
       'accountNumber': accountNumber,
       'balance': balance,
+      'bankName': bankName,
+      'branchName': branchName,
     };
     if (id != null) map['id'] = id;
     return map;
@@ -31,6 +37,8 @@ class BankAccount {
       type: map['type'],
       accountNumber: map['accountNumber'],
       balance: (map['balance'] as num).toDouble(),
+      bankName: map['bankName'],
+      branchName: map['branchName'],
     );
   }
 }

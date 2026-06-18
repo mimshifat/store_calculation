@@ -191,53 +191,99 @@ class CustomerCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
 
-                // ── Row 2: Phone number (tappable) ──
-                InkWell(
-                  onTap: customer.mobile.isNotEmpty
-                      ? () async {
-                          final Uri url = Uri.parse('tel:${customer.mobile}');
+                // ── Row 2: Phone number (tappable) and SMS ──
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    InkWell(
+                      onTap: customer.mobile.isNotEmpty
+                          ? () async {
+                              final Uri url = Uri.parse('tel:${customer.mobile}');
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url);
+                              } else {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('কল করা সম্ভব হচ্ছে না')),
+                                  );
+                                }
+                              }
+                            }
+                          : null,
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.phone,
+                              size: 16,
+                              color: customer.mobile.isNotEmpty
+                                  ? Colors.blue
+                                  : Colors.grey,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              customer.mobile.isNotEmpty
+                                  ? customer.mobile
+                                  : 'মোবাইল নম্বর নেই',
+                              style: TextStyle(
+                                color: customer.mobile.isNotEmpty
+                                    ? Colors.blue
+                                    : Colors.grey.shade700,
+                                decoration: customer.mobile.isNotEmpty
+                                    ? TextDecoration.underline
+                                    : TextDecoration.none,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (hasDue && customer.mobile.isNotEmpty)
+                      InkWell(
+                        onTap: () async {
+                          final message = 'সম্মানিত গ্রাহক, আপনার বকেয়া টাকার পরিমাণ ৳${_toBengali(customer.dueAmount.toStringAsFixed(0))}। অনুগ্রহ করে বকেয়া পরিশোধ করুন।\n\nধন্যবাদান্তে,\nমেসার্স শুকরিয়া স্টোর\nবালিয়াডাঙ্গা বাজার';
+                          final Uri url = Uri.parse('sms:${customer.mobile}?body=${Uri.encodeComponent(message)}');
                           if (await canLaunchUrl(url)) {
                             await launchUrl(url);
                           } else {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('কল করা সম্ভব হচ্ছে না')),
+                                    content: Text('এসএমএস পাঠানো সম্ভব হচ্ছে না')),
                               );
                             }
                           }
-                        }
-                      : null,
-                  borderRadius: BorderRadius.circular(4),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.phone,
-                          size: 16,
-                          color: customer.mobile.isNotEmpty
-                              ? Colors.blue
-                              : Colors.grey,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          customer.mobile.isNotEmpty
-                              ? customer.mobile
-                              : 'মোবাইল নম্বর নেই',
-                          style: TextStyle(
-                            color: customer.mobile.isNotEmpty
-                                ? Colors.blue
-                                : Colors.grey.shade700,
-                            decoration: customer.mobile.isNotEmpty
-                                ? TextDecoration.underline
-                                : TextDecoration.none,
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.blue.shade200),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.message, size: 14, color: Colors.blue.shade700),
+                              const SizedBox(width: 6),
+                              Text(
+                                'মেসেজ',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue.shade700,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 8),
 
@@ -331,7 +377,7 @@ class CustomerCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (agingDays >= 15)
+                      if (agingDays >= 1)
                         _buildAgingBadge(agingDays)
                       else
                         const SizedBox.shrink(),
