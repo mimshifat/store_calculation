@@ -230,6 +230,18 @@ class _ReportScreenState extends State<ReportScreen> {
                               Icons.remove_circle_outline),
                         ],
                       ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          _buildReportCard(
+                              'দোকান ভাড়া',
+                              provider.totalRentExpense,
+                              Colors.deepOrange,
+                              Icons.store),
+                          const SizedBox(width: 12),
+                          const Expanded(child: SizedBox()), // Empty space for alignment
+                        ],
+                      ),
                       const SizedBox(height: 32),
 
                       if (provider.totalSales > 0 ||

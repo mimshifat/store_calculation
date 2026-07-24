@@ -6,6 +6,10 @@ class CashEntry {
   String description;
   DateTime date;
   String paymentMethod;
+  String? shopName;
+  String? ownerName;
+  String? receiptNumber;
+  String? paidVia;
 
   CashEntry({
     this.id,
@@ -15,7 +19,13 @@ class CashEntry {
     required this.description,
     required this.date,
     this.paymentMethod = 'Cash',
+    this.shopName,
+    this.ownerName,
+    this.receiptNumber,
+    this.paidVia,
   });
+
+  bool get isRentEntry => category == 'দোকান ভাড়া';
 
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{
@@ -27,6 +37,10 @@ class CashEntry {
       'paymentMethod': paymentMethod,
     };
     if (id != null) map['id'] = id;
+    if (shopName != null) map['shopName'] = shopName;
+    if (ownerName != null) map['ownerName'] = ownerName;
+    if (receiptNumber != null) map['receiptNumber'] = receiptNumber;
+    if (paidVia != null) map['paidVia'] = paidVia;
     return map;
   }
 
@@ -39,6 +53,10 @@ class CashEntry {
       description: map['description'] ?? '',
       date: DateTime.parse(map['date']),
       paymentMethod: map['paymentMethod'] ?? 'Cash',
+      shopName: map['shopName'],
+      ownerName: map['ownerName'],
+      receiptNumber: map['receiptNumber'],
+      paidVia: map['paidVia'],
     );
   }
 }

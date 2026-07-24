@@ -20,9 +20,19 @@ class _CashBookScreenState extends State<CashBookScreen> {
     final amountController = TextEditingController();
     final categoryController = TextEditingController();
     final descController = TextEditingController();
+    
+    // New fields for rent
+    final shopNameController = TextEditingController();
+    final ownerNameController = TextEditingController();
+    final receiptController = TextEditingController();
+    final paidViaController = TextEditingController();
+    
     DateTime selectedDateTime = DateTime.now();
     String paymentMethod = 'Cash';
     final paymentOptions = ['Cash', 'bKash', 'Nagad', 'Bank', 'Others'];
+    
+    String selectedCategory = 'অন্যান্য';
+    final categoryOptions = ['দোকান ভাড়া', 'কেনাকাটা', 'বিদ্যুৎ', 'পরিবহন', 'অন্যান্য'];
 
     showDialog(
       context: context,
@@ -44,15 +54,77 @@ class _CashBookScreenState extends State<CashBookScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextField(
-                    controller: categoryController,
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedCategory,
                     decoration: const InputDecoration(
-                      labelText: 'ক্যাটাগরি',
+                      labelText: 'ক্যাটাগরি নির্বাচন করুন',
                       prefixIcon: Icon(Icons.category),
                       border: OutlineInputBorder(),
-                      hintText: 'কেনাকাটা, বিদ্যুৎ, পরিবহন',
                     ),
+                    items: categoryOptions.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setStateDialog(() {
+                          selectedCategory = val;
+                          if (val != 'অন্যান্য') {
+                            categoryController.text = val;
+                          } else {
+                            categoryController.clear();
+                          }
+                        });
+                      }
+                    },
                   ),
+                  const SizedBox(height: 12),
+                  if (selectedCategory == 'অন্যান্য')
+                    TextField(
+                      controller: categoryController,
+                      decoration: const InputDecoration(
+                        labelText: 'ক্যাটাগরির নাম লিখুন',
+                        prefixIcon: Icon(Icons.edit),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  if (selectedCategory == 'অন্যান্য') const SizedBox(height: 12),
+                  
+                  if (selectedCategory == 'দোকান ভাড়া') ...[
+                    TextField(
+                      controller: shopNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'দোকানের নাম',
+                        prefixIcon: Icon(Icons.store),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: ownerNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'মালিকের নাম',
+                        prefixIcon: Icon(Icons.person),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: receiptController,
+                      decoration: const InputDecoration(
+                        labelText: 'রশিদ/ট্রান্জেকশন নাম্বার (ঐচ্ছিক)',
+                        prefixIcon: Icon(Icons.receipt),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: paidViaController,
+                      decoration: const InputDecoration(
+                        labelText: 'মাধ্যম (কার হাতে দিয়েছেন)',
+                        prefixIcon: Icon(Icons.handshake),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   const SizedBox(height: 12),
                   TextField(
                     controller: descController,
@@ -93,6 +165,10 @@ class _CashBookScreenState extends State<CashBookScreen> {
                       description: descController.text.trim(),
                       date: selectedDateTime,
                       paymentMethod: paymentMethod,
+                      shopName: selectedCategory == 'দোকান ভাড়া' ? shopNameController.text.trim() : null,
+                      ownerName: selectedCategory == 'দোকান ভাড়া' ? ownerNameController.text.trim() : null,
+                      receiptNumber: selectedCategory == 'দোকান ভাড়া' ? receiptController.text.trim() : null,
+                      paidVia: selectedCategory == 'দোকান ভাড়া' ? paidViaController.text.trim() : null,
                     );
                     Provider.of<CashProvider>(context, listen: false).addEntry(entry);
                     Navigator.pop(ctx);
@@ -120,9 +196,18 @@ class _CashBookScreenState extends State<CashBookScreen> {
     final amountController = TextEditingController(text: entry.amount.toStringAsFixed(0));
     final categoryController = TextEditingController(text: entry.category);
     final descController = TextEditingController(text: entry.description);
+    
+    final shopNameController = TextEditingController(text: entry.shopName ?? '');
+    final ownerNameController = TextEditingController(text: entry.ownerName ?? '');
+    final receiptController = TextEditingController(text: entry.receiptNumber ?? '');
+    final paidViaController = TextEditingController(text: entry.paidVia ?? '');
+
     DateTime selectedDateTime = entry.date;
     final paymentOptions = ['Cash', 'bKash', 'Nagad', 'Bank', 'Others'];
     String paymentMethod = paymentOptions.contains(entry.paymentMethod) ? entry.paymentMethod : 'Cash';
+    
+    final categoryOptions = ['দোকান ভাড়া', 'কেনাকাটা', 'বিদ্যুৎ', 'পরিবহন', 'অন্যান্য'];
+    String selectedCategory = categoryOptions.contains(entry.category) ? entry.category : 'অন্যান্য';
 
     showDialog(
       context: context,
@@ -144,14 +229,77 @@ class _CashBookScreenState extends State<CashBookScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextField(
-                    controller: categoryController,
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedCategory,
                     decoration: const InputDecoration(
-                      labelText: 'ক্যাটাগরি',
+                      labelText: 'ক্যাটাগরি নির্বাচন করুন',
                       prefixIcon: Icon(Icons.category),
                       border: OutlineInputBorder(),
                     ),
+                    items: categoryOptions.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setStateDialog(() {
+                          selectedCategory = val;
+                          if (val != 'অন্যান্য') {
+                            categoryController.text = val;
+                          } else {
+                            categoryController.clear();
+                          }
+                        });
+                      }
+                    },
                   ),
+                  const SizedBox(height: 12),
+                  if (selectedCategory == 'অন্যান্য')
+                    TextField(
+                      controller: categoryController,
+                      decoration: const InputDecoration(
+                        labelText: 'ক্যাটাগরির নাম লিখুন',
+                        prefixIcon: Icon(Icons.edit),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  if (selectedCategory == 'অন্যান্য') const SizedBox(height: 12),
+
+                  if (selectedCategory == 'দোকান ভাড়া') ...[
+                    TextField(
+                      controller: shopNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'দোকানের নাম',
+                        prefixIcon: Icon(Icons.store),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: ownerNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'মালিকের নাম',
+                        prefixIcon: Icon(Icons.person),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: receiptController,
+                      decoration: const InputDecoration(
+                        labelText: 'রশিদ/ট্রান্জেকশন নাম্বার (ঐচ্ছিক)',
+                        prefixIcon: Icon(Icons.receipt),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: paidViaController,
+                      decoration: const InputDecoration(
+                        labelText: 'মাধ্যম (কার হাতে দিয়েছেন)',
+                        prefixIcon: Icon(Icons.handshake),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   const SizedBox(height: 12),
                   TextField(
                     controller: descController,
@@ -193,6 +341,10 @@ class _CashBookScreenState extends State<CashBookScreen> {
                       description: descController.text.trim(),
                       date: selectedDateTime,
                       paymentMethod: paymentMethod,
+                      shopName: selectedCategory == 'দোকান ভাড়া' ? shopNameController.text.trim() : null,
+                      ownerName: selectedCategory == 'দোকান ভাড়া' ? ownerNameController.text.trim() : null,
+                      receiptNumber: selectedCategory == 'দোকান ভাড়া' ? receiptController.text.trim() : null,
+                      paidVia: selectedCategory == 'দোকান ভাড়া' ? paidViaController.text.trim() : null,
                     );
                     provider.updateEntry(updatedEntry);
                     Navigator.pop(ctx);
@@ -499,6 +651,18 @@ class _CashBookScreenState extends State<CashBookScreen> {
               '${AppUtils.toBengali(DateFormat('hh:mm a').format(entry.date))} • ${entry.paymentMethod}',
               style: theme.textTheme.bodySmall,
             ),
+            if (entry.isRentEntry) ...[
+              const SizedBox(height: 4),
+              Text(
+                'দোকান: ${entry.shopName ?? 'N/A'}${entry.ownerName?.isNotEmpty == true ? ' • মালিক: ${entry.ownerName}' : ''}',
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.black87),
+              ),
+              if (entry.receiptNumber?.isNotEmpty == true || entry.paidVia?.isNotEmpty == true)
+                Text(
+                  '${entry.receiptNumber?.isNotEmpty == true ? 'রশিদ: ${entry.receiptNumber}' : ''}${entry.receiptNumber?.isNotEmpty == true && entry.paidVia?.isNotEmpty == true ? ' • ' : ''}${entry.paidVia?.isNotEmpty == true ? 'মাধ্যম: ${entry.paidVia}' : ''}',
+                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.black87),
+                ),
+            ],
             if (entry.description.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(entry.description, style: theme.textTheme.bodyMedium?.copyWith(color: Colors.black87)),

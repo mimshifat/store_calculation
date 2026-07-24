@@ -27,7 +27,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 9,
+      version: 10,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
       onConfigure: (db) async {
@@ -78,7 +78,11 @@ class DatabaseHelper {
         amount REAL NOT NULL,
         description TEXT,
         date TEXT NOT NULL,
-        paymentMethod TEXT DEFAULT 'Cash'
+        paymentMethod TEXT DEFAULT 'Cash',
+        shopName TEXT,
+        ownerName TEXT,
+        receiptNumber TEXT,
+        paidVia TEXT
       )
     ''');
 
@@ -263,6 +267,21 @@ class DatabaseHelper {
       } catch (_) {}
       try {
         await db.execute('ALTER TABLE bank_accounts ADD COLUMN branchName TEXT');
+      } catch (_) {}
+    }
+
+    if (oldVersion < 10) {
+      try {
+        await db.execute('ALTER TABLE cash_entries ADD COLUMN shopName TEXT');
+      } catch (_) {}
+      try {
+        await db.execute('ALTER TABLE cash_entries ADD COLUMN ownerName TEXT');
+      } catch (_) {}
+      try {
+        await db.execute('ALTER TABLE cash_entries ADD COLUMN receiptNumber TEXT');
+      } catch (_) {}
+      try {
+        await db.execute('ALTER TABLE cash_entries ADD COLUMN paidVia TEXT');
       } catch (_) {}
     }
   }

@@ -9,6 +9,7 @@ class ReportProvider with ChangeNotifier {
   double totalPurchases = 0;
   double totalSupplierPayments = 0;
   double totalCashExpense = 0;
+  double totalRentExpense = 0;
 
   bool get isLoading => _isLoading;
 
@@ -22,6 +23,7 @@ class ReportProvider with ChangeNotifier {
     totalPurchases = 0;
     totalSupplierPayments = 0;
     totalCashExpense = 0;
+    totalRentExpense = 0;
 
     final db = await DatabaseHelper.instance.database;
     final startIso = startDate.toIso8601String();
@@ -70,6 +72,9 @@ class ReportProvider with ChangeNotifier {
       final amount = (tx['amount'] as num).toDouble();
       if (tx['type'] == 'expense') {
         totalCashExpense += amount;
+        if (tx['category'] == 'দোকান ভাড়া') {
+          totalRentExpense += amount;
+        }
       }
     }
 
