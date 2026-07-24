@@ -71,9 +71,10 @@ class ReportProvider with ChangeNotifier {
     for (var tx in cashTxs) {
       final amount = (tx['amount'] as num).toDouble();
       if (tx['type'] == 'expense') {
-        totalCashExpense += amount;
         if (tx['category'] == 'দোকান ভাড়া') {
           totalRentExpense += amount;
+        } else {
+          totalCashExpense += amount;
         }
       }
     }
